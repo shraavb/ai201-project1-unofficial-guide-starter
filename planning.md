@@ -1,7 +1,7 @@
 # Project 1 Planning: The Unofficial Guide
 
 > Write this document before you write any pipeline code.
-> Your spec and architecture diagram are what you'll use to direct AI tools (Claude, Copilot, etc.) to generate your implementation — the more specific they are, the more useful the generated code will be.
+> Your spec and architecture diagram are what you'll use to direct AI tools (Claude, Copilot, etc.) to generate your implementation - the more specific they are, the more useful the generated code will be.
 > Update the Retrieval Approach and Chunking Strategy sections if you change your approach during implementation.
 > Update this file before starting any stretch features.
 
@@ -22,17 +22,17 @@ Syllabus of classes from previous years - Often, as professors change and the cl
 
 | # | Source | Description | URL or location |
 |---|--------|-------------|-----------------|
-| 1 | BEPP 2330 (Spring 2023) | Business Economics & Public Policy 2330 — markets, regulation, policy analysis | `documents/BEPP 2330 Syllabus Spring 2023.pdf` |
+| 1 | BEPP 2330 (Spring 2023) | Business Economics & Public Policy 2330 - markets, regulation, policy analysis | `documents/BEPP 2330 Syllabus Spring 2023.pdf` |
 | 2 | Corporate Valuation (2014) | Finance elective covering DCF, comparables, LBO, and valuation frameworks | `documents/Corporate Valuation Syllabus 2014.pdf` |
-| 3 | FNCE 250 (Spring 2016) | Intermediate corporate finance — capital structure, payout, and risk | `documents/FNCE 250 Syllabus Spring 2016.pdf` |
+| 3 | FNCE 250 (Spring 2016) | Intermediate corporate finance - capital structure, payout, and risk | `documents/FNCE 250 Syllabus Spring 2016.pdf` |
 | 4 | FNCE 101 (Fall 2021) | Introductory finance; time value of money, NPV, basic valuation | `documents/FNCE101_Syllabus_Asher_F21.pdf` |
-| 5 | MEAM 210 | Mechanical Engineering & Applied Mechanics 210 — dynamics and modeling | `documents/MEAM 210 Syllabus.pdf` |
-| 6 | MGMT 237 (Spring 2015) | Management elective — organizational behavior or strategy | `documents/MGMT-237-Syllabus-Spring-2015.pdf` |
+| 5 | MEAM 210 | Mechanical Engineering & Applied Mechanics 210 - dynamics and modeling | `documents/MEAM 210 Syllabus.pdf` |
+| 6 | MGMT 237 (Spring 2015) | Management elective - organizational behavior or strategy | `documents/MGMT-237-Syllabus-Spring-2015.pdf` |
 | 7 | MGMT 100 | Introductory management; teamwork, leadership, organizational fundamentals | `documents/MGMT_100_Syllabus.pdf` |
-| 8 | ACCT 101 (Fall 2010) | Introductory financial accounting — income statement, balance sheet, cash flows | `documents/Syllabus ACCT101 FALL 2010.pdf` |
-| 9 | ACCT 102 (Spring 2017) | Intermediate accounting — managerial accounting and cost analysis | `documents/Syllabus and schedule -Spring 2017 ACCT 102.pdf` |
-| 10 | General Chemistry 101 | Intro general chemistry — atomic structure, bonding, stoichiometry | `documents/Syllabus for General Chemistry 101.pdf` |
-| 11 | FNCE 239/739 (2020) | Advanced finance seminar — cross-listed undergrad/grad topics | `documents/Syllabus_FNCE239-739_2020.pdf` |
+| 8 | ACCT 101 (Fall 2010) | Introductory financial accounting - income statement, balance sheet, cash flows | `documents/Syllabus ACCT101 FALL 2010.pdf` |
+| 9 | ACCT 102 (Spring 2017) | Intermediate accounting - managerial accounting and cost analysis | `documents/Syllabus and schedule -Spring 2017 ACCT 102.pdf` |
+| 10 | General Chemistry 101 | Intro general chemistry - atomic structure, bonding, stoichiometry | `documents/Syllabus for General Chemistry 101.pdf` |
+| 11 | FNCE 239/739 (2020) | Advanced finance seminar - cross-listed undergrad/grad topics | `documents/Syllabus_FNCE239-739_2020.pdf` |
 
 ---
 
@@ -49,7 +49,7 @@ Syllabus of classes from previous years - Often, as professors change and the cl
 
 **Overlap:** 50 characters
 
-**Reasoning:** Syllabi have short, discrete sections (course description, grading breakdown, weekly schedule, policies) — 500 chars keeps most paragraphs and policy blocks intact without splitting mid-sentence. Recursive splitting respects these natural boundaries: tries paragraph breaks first, falls back to sentences, then words, so grading tables and bullet-point policies stay coherent. 50-char overlap (10%) ensures boundary context carries over — e.g. a section header isn't orphaned from its content. Fixed-size would blindly cut mid-table; semantic would require embeddings at ingestion time. Recursive is the right fit for inconsistently formatted real-world PDFs like these.
+**Reasoning:** Syllabi have short, discrete sections (course description, grading breakdown, weekly schedule, policies) - 500 chars keeps most paragraphs and policy blocks intact without splitting mid-sentence. Recursive splitting respects these natural boundaries: tries paragraph breaks first, falls back to sentences, then words, so grading tables and bullet-point policies stay coherent. 50-char overlap (10%) ensures boundary context carries over - e.g. a section header isn't orphaned from its content. Fixed-size would blindly cut mid-table; semantic would require embeddings at ingestion time. Recursive is the right fit for inconsistently formatted real-world PDFs like these.
 
 ---
 
@@ -58,14 +58,14 @@ Syllabus of classes from previous years - Often, as professors change and the cl
 <!-- Which embedding model are you using (e.g., all-MiniLM-L6-v2 via sentence-transformers)?
      How many chunks will you retrieve per query (top-k)?
      If you were deploying this for real users and cost wasn't a constraint, what tradeoffs
-     would you weigh in choosing a different embedding model — context length, multilingual
+     would you weigh in choosing a different embedding model - context length, multilingual
      support, accuracy on domain-specific text, latency? -->
 
 **Embedding model:** `all-MiniLM-L6-v2` via sentence-transformers (free, runs locally, no API key required)
 
 **Top-k:** 3
 
-**Production tradeoff reflection:** `all-MiniLM-L6-v2` is fast and free but has a 256-token context window — a chunk near the size limit may get truncated. For production with no cost constraint, I'd consider OpenAI's `text-embedding-3-large` (3072 dimensions, much higher accuracy) or `text-embedding-3-small` (1536 dimensions, better cost/quality tradeoff). Tradeoffs to weigh: (1) **Context length** — `3-large` handles longer chunks without truncation; (2) **Domain accuracy** — OpenAI models are trained on broader corpora and tend to retrieve more precisely on academic/structured text like syllabi; (3) **Latency** — local MiniLM wins at inference speed, but remote OpenAI adds network round-trip; (4) **Multilingual** — syllabi here are English-only so not a concern, but `paraphrase-multilingual-MiniLM-L12-v2` would matter for a global student corpus.
+**Production tradeoff reflection:** `all-MiniLM-L6-v2` is fast and free but has a 256-token context window - a chunk near the size limit may get truncated. For production with no cost constraint, I'd consider OpenAI's `text-embedding-3-large` (3072 dimensions, much higher accuracy) or `text-embedding-3-small` (1536 dimensions, better cost/quality tradeoff). Tradeoffs to weigh: (1) **Context length** - `3-large` handles longer chunks without truncation; (2) **Domain accuracy** - OpenAI models are trained on broader corpora and tend to retrieve more precisely on academic/structured text like syllabi; (3) **Latency** - local MiniLM wins at inference speed, but remote OpenAI adds network round-trip; (4) **Multilingual** - syllabi here are English-only so not a concern, but `paraphrase-multilingual-MiniLM-L12-v2` would matter for a global student corpus.
 
 ---
 
@@ -109,7 +109,7 @@ Syllabus of classes from previous years - Often, as professors change and the cl
 │       ▼  pdfplumber                                         │
 │  Raw text extraction + cleaning (regex)                     │
 │       │                                                     │
-│       ▼  recursive_split() — 500 chars / 50 overlap         │
+│       ▼  recursive_split() - 500 chars / 50 overlap         │
 │  Chunks [ ][ ][ ][ ] ...                                    │
 │       │                                                     │
 │       ▼  sentence-transformers (all-MiniLM-L6-v2)           │
@@ -152,19 +152,19 @@ Syllabus of classes from previous years - Often, as professors change and the cl
      "I'll give Claude my Chunking Strategy section and ask it to implement chunk_text()
      with my specified chunk size and overlap" is a plan. -->
 
-**Milestone 3 — Ingestion and chunking:**
+**Milestone 3 - Ingestion and chunking:**
 - Tool: Claude Code
 - Input: Chunking Strategy section from this planning.md + requirement to use pdfplumber + recursive splitting at 500 chars / 50 overlap
 - Expected output: `ingest.py` with `extract_text()`, `clean_text()`, and `recursive_split()` functions
 - Verification: run `python ingest.py`, confirm chunk count printed per file is reasonable (not 1 giant chunk, not hundreds of 1-word chunks)
 
-**Milestone 4 — Embedding and retrieval:**
+**Milestone 4 - Embedding and retrieval:**
 - Tool: Claude Code
 - Input: Retrieval Approach section + `ingest.py` skeleton + requirement to use all-MiniLM-L6-v2 and ChromaDB
 - Expected output: embedding loop in `ingest.py` and `query_system()` function in `query.py` that returns top-3 chunks with source metadata
 - Verification: run a known-answer query and confirm the retrieved chunks come from the expected document
 
-**Milestone 5 — Generation and interface:**
+**Milestone 5 - Generation and interface:**
 - Tool: Claude Code
 - Input: Grounded Response Generation requirement + system prompt design + `query.py` skeleton
 - Expected output: Groq API call (llama-3.3-70b-versatile) with grounding system prompt; answer always includes `[Source: ...]` citation; CLI loop in `main()`
