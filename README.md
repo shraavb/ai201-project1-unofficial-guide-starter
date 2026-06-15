@@ -84,6 +84,47 @@ e.g. [Source: FNCE101_Syllabus_Asher_F21.pdf].
 
 **How source attribution is surfaced in the response:** The system prompt instructs the model to always end every answer with a `[Source: filename.pdf]` citation. In addition, `query.py` prints the source filenames of the retrieved chunks below the answer, so the user can see which documents were consulted even if the model fails to cite them inline.
 
+**Out-of-scope query example:**
+
+Query: `"What restaurant near campus has the best lunch options?"`
+
+System response:
+```
+I could not find that information in the available syllabi.
+[Source: MGMT_100_Syllabus.pdf, BEPP 2330 Syllabus Spring 2023.pdf]
+
+Retrieved from: MGMT_100_Syllabus.pdf, BEPP 2330 Syllabus Spring 2023.pdf, FNCE101_Syllabus_Asher_F21.pdf
+```
+
+The retrieved chunks were about campus scheduling and course logistics — nothing about restaurants. The model refused rather than hallucinating an answer, because the system prompt explicitly prohibits using outside knowledge. The grounding instruction enforces this even when the query is clearly out of domain.
+
+---
+
+## Query Interface
+
+**Input:** A natural language question typed at the terminal prompt (`Ask a question about course syllabi (or 'quit' to exit):`).
+
+**Output:** The system prints two things:
+1. The grounded answer from Groq (`llama-3.3-70b-versatile`), ending with a `[Source: filename.pdf]` inline citation.
+2. A programmatic list of the retrieved source filenames from ChromaDB metadata, printed below the answer.
+
+**Sample interaction transcript:**
+
+```
+$ python query.py
+Ask a question about course syllabi (or 'quit' to exit): What attendance policy does MGMT 100 have?
+
+Answer:
+Since Management 100 is highly interactive and experiential, class attendance is required.
+Lateness and unexcused absences will have a negative impact on your individual performance
+evaluation and final grade.
+[Source: MGMT_100_Syllabus.pdf]
+
+Retrieved from: MGMT_100_Syllabus.pdf, Corporate Valuation Syllabus 2014.pdf, MEAM 210 Syllabus.pdf
+
+Ask a question about course syllabi (or 'quit' to exit): quit
+```
+
 ---
 
 ## Sample Chunks
